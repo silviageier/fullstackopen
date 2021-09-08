@@ -1,0 +1,20 @@
+title 0.6: new note spa
+
+note left of browser:
+user inputs text to form
+and clicks Submit button
+end note
+
+note over browser:
+browser executes the JS event handler
+that handles the form submit event:
+
+creates a new note,
+adds it to the notes list,
+rerenders the note list on the page,
+and sends the new note to the server.
+end note
+
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+
+server->browser: HTTP status code 201 (created)
