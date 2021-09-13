@@ -1,11 +1,11 @@
 import React from 'react'
-import Details from './Details'
 
-const Persons = ({people}) => {
+
+const Persons = ({people, removeName}) => {
     return (
       <div>
         {people.map(person =>
-          <Details key={person.name} person={person} />  
+          <li key={person.id}>{person.name} {person.number} <button onClick={() => removeName(person.id, person.name)}>delete</button></li>
         )}
       </div>
     )
