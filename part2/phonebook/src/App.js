@@ -2,14 +2,19 @@ import React, { useEffect, useState } from 'react'
 import Persons from './components/Persons'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
+import Notification from './components/Notification'
+import Warning from './components/Warning'
 import axios from 'axios'
 import personService from './services/personService'
+import './index.css'
 
 const App = () => {
   const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [searchTerm,setSearchTerm] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState(null)
+  const [warningMessage, setWarningMessage] = useState(null)
 
   useEffect(() => {
     personService
@@ -35,9 +40,28 @@ const App = () => {
         console.log(match)
         const changedPerson = {...match, number: newNumber}
         personService
-        .update(match.id,changedPerson) 
-        setNewName('')
-        setNewNumber('')
+        .update(match.id,changedPerson)
+        .then (() => {
+          setNewName('')
+          setNewNumber('')
+          setNotificationMessage(
+            `Number of '${match.name}' was successfully updated`
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
+
+        })
+        .catch(error => {
+          setWarningMessage(
+            `Number of '${match.name}' has been deleted`
+          )
+          setTimeout(() => {
+            setWarningMessage(null)
+          }, 5000)
+          setPersons(persons.filter(n => n.id !== match.id))
+        })
+
       }     
     }
     else {
@@ -47,6 +71,12 @@ const App = () => {
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
+        setNotificationMessage(
+          `Number for '${newName}' was successfully added`
+        )
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 5000)
       })
     }
     setPersons(persons)
@@ -55,9 +85,26 @@ const App = () => {
   const removeName = (id, name) => {
     console.log("delete id",id)
     if (window.confirm("Do you really want to delete " + name + "?")) {
-      personService.remove(id)
-      setPersons(persons)
-      console.log("deleted")
+      personService.remove(id).then (() => {
+        setPersons(persons.map(person => person))
+        console.log("deleted")
+        setNotificationMessage(
+          `Number of '${name}' was successfully deleted`
+        )
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 5000)
+      })
+      .catch(error => {
+        setWarningMessage(
+          `Number of '${name}' has already been deleted`
+        )
+        setTimeout(() => {
+          setWarningMessage(null)
+        }, 5000)
+        setPersons(persons.filter(n => n.id !== id))
+      })
+
     }
     personService
       .getAll()
@@ -91,6 +138,8 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={notificationMessage} />
+      <Warning message={warningMessage} />
       <PersonForm addName={addName}
                   newName={newName}
                   handleNameChange={handleNameChange}
